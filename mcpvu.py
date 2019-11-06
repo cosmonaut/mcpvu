@@ -22,7 +22,7 @@ class Main(QMainWindow, UiMainWindow):
         self.setupUi(self)
 
         # File/quit
-        self.actionQuit.triggered.connect(self.nn_quit)
+        self.actionQuit.triggered.connect(self.do_quit)
         # A test button...
         #self.pushButton_1.clicked.connect(self.widget.plot)
         self.pushButton_1.clicked.connect(self.load_plugin)
@@ -33,7 +33,7 @@ class Main(QMainWindow, UiMainWindow):
         #print("close event")
         pass
 
-    def nn_quit(self, action):
+    def do_quit(self, action):
         print("quitting...")
         self.close()
 
