@@ -2,6 +2,8 @@ import sys
 
 import numpy as np
 
+import importlib
+
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import uic
 from PyQt5.uic import loadUiType
@@ -22,7 +24,8 @@ class Main(QMainWindow, UiMainWindow):
         # File/quit
         self.actionQuit.triggered.connect(self.nn_quit)
         # A test button...
-        self.pushButton_1.clicked.connect(self.widget.plot)
+        #self.pushButton_1.clicked.connect(self.widget.plot)
+        self.pushButton_1.clicked.connect(self.load_plugin)
         
     
     def closeEvent(self, event):
@@ -34,6 +37,16 @@ class Main(QMainWindow, UiMainWindow):
         print("quitting...")
         self.close()
 
+    def load_plugin(self):
+        print("Loading plugin...")
+        try:
+            baseplugin = importlib.import_module("baseplugin")
+            my_plugin = baseplugin.load_plugin()
+        except ModuleNotFoundError:
+            print("Module not found...")
+
+        
+        
 
 class Ui(QMainWindow):
     def __init__(self):
