@@ -4,7 +4,7 @@ import numpy as np
 
 import importlib
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QInputDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QInputDialog, QMessageBox
 from PyQt5 import QtWidgets
 from PyQt5 import uic
 from PyQt5.uic import loadUiType
@@ -33,8 +33,8 @@ class Main(QMainWindow, UiMainWindow):
         self.actionLoad_Plugin.triggered.connect(self.plugin_menu)
         
         # A test button...
-        #self.pushButton_1.clicked.connect(self.widget.plot)
-        self.pushButton_1.clicked.connect(self.load_plugin)
+        self.pushButton_1.clicked.connect(self.widget.plot)
+        #self.pushButton_1.clicked.connect(self.load_plugin)
         
     
     def closeEvent(self, event):
@@ -48,7 +48,6 @@ class Main(QMainWindow, UiMainWindow):
 
     def plugin_menu(self):
         """Menu to select and load a plugin"""
-        #items = ("Red","Blue","Green")
         plugin_name, ok = QInputDialog.getItem(self, "Plugin Menu","Plugin:", self.plugin_list, 0, False)
         if ok and plugin_name:
             print("Loading plugin: {0:s}".format(plugin_name))
@@ -62,8 +61,8 @@ class Main(QMainWindow, UiMainWindow):
             my_plugin = baseplugin.load_plugin()
         except ModuleNotFoundError:
             print("Module not found...")
-            # TODO warning/error window 
-
+            # Warning window
+            QMessageBox.warning(self, "Warning", "Plugin not found...")
         
         
 # Load the UI
