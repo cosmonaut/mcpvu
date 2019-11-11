@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # * Toolbar or pan/zoom
 # * Colormap options
 class implotCanvas(FigureCanvas):
-    def __init__(self, parent = None, xbit = 8, ybit = 8, width = 6, height = 4, dpi = 150):
+    def __init__(self, parent = None, xbit = 10, ybit = 10, width = 6, height = 4, dpi = 150):
 
         fig = Figure(figsize = (width, height), dpi = dpi)
 

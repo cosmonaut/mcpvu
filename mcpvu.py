@@ -28,7 +28,7 @@ class Main(QMainWindow, UiMainWindow):
         
         # todo populate at init with real plugins...
         # file that holds names..? search dir? config file?
-        self.plugin_list = ["baseplugin"]
+        self.plugin_list = ["skeletonplugin", "baseplugin"]
 
         # Data acquisition timer.
         self._dat_timer = QTimer()
@@ -49,6 +49,8 @@ class Main(QMainWindow, UiMainWindow):
         # TODO:
         # * remove implotcanvas native from ui in designer.
         # * add dynamic plot loading and placement per plugin config
+        # * text file that contains loadable plugins for menu... (with gen script?)
+        # * real detector plugin...
         # * Track master photon list and allow fits file save (one bin table per det segment?)
         # * Generate phd plot
         # * Generate count rate history plot
@@ -136,6 +138,7 @@ class Main(QMainWindow, UiMainWindow):
             #self.widget.clear()
             self._dat_timer.stop()
             self._plot_timer.stop()
+            print("plugin paused...")
 
     def unpause_plugin(self):
         """Unpause plugin"""
@@ -143,6 +146,7 @@ class Main(QMainWindow, UiMainWindow):
             self._plugin.unpause()
             self._dat_timer.start()
             self._plot_timer.start()
+            print("plugin running...")
 
     def get_data(self):
         """Get data from plugin. Called from a GUI timer on a regular
@@ -150,7 +154,7 @@ class Main(QMainWindow, UiMainWindow):
         d = self._plugin.get_data()
         if (d != None):
             # process data...
-            print(d.len)
+            #print(d.len)
             # Append new data to all plots?
             self.widget.append_data(d)
 

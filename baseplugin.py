@@ -7,7 +7,6 @@ import numpy as np
 class BasePlugin(object):
     def __init__(self):
         """Base plugin class"""
-        print("BasePlugin loaded...")
         self._config = PluginConfig()
 
         # Data
@@ -22,6 +21,8 @@ class BasePlugin(object):
         self._sample_thread = threading.Thread(target = self._run)
         # Flag for thread close (don't change in thread)
         self._flag = False
+
+        print("BasePlugin loaded...")
 
     def start(self):
         """Start plugin"""
@@ -105,6 +106,8 @@ class PhotonData(object):
     
 class PluginConfig(object):
     def __init__(self):
+        """Configuration for each detector segment
+        xbits, ybits, and pbits must have length that matches segments"""
         # Number of X bits per segment
         self.xbits = [8]
         # Number of Y bits per segment
