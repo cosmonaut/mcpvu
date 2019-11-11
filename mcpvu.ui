@@ -25,9 +25,16 @@
     </property>
     <layout class="QGridLayout" name="gridLayout">
      <item row="1" column="0">
-      <widget class="QPushButton" name="pushButton_1">
+      <widget class="QPushButton" name="startButton">
        <property name="text">
         <string>DO</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="pauseButton">
+       <property name="text">
+        <string>Pause</string>
        </property>
       </widget>
      </item>
@@ -57,6 +64,7 @@
      <string>Plugin</string>
     </property>
     <addaction name="actionLoad_Plugin"/>
+    <addaction name="actionUnload_Plugin"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPlugin"/>
@@ -70,6 +78,11 @@
   <action name="actionLoad_Plugin">
    <property name="text">
     <string>Load Plugin</string>
+   </property>
+  </action>
+  <action name="actionUnload_Plugin">
+   <property name="text">
+    <string>Unload Plugin</string>
    </property>
   </action>
  </widget>

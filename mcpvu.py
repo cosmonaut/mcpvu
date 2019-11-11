@@ -22,6 +22,9 @@ class Main(QMainWindow, UiMainWindow):
         super(Main, self).__init__()
         self.setupUi(self)
 
+        # Currently loaded plugin
+        self._plugin = None
+        
         # todo populate at init with real plugins...
         # file that holds names..? search dir? config file?
         self.plugin_list = ["baseplugin"]
@@ -31,9 +34,18 @@ class Main(QMainWindow, UiMainWindow):
 
         # Load Plugin
         self.actionLoad_Plugin.triggered.connect(self.plugin_menu)
+        self.actionUnload_Plugin.triggered.connect(self.unload_plugin)
+
+        self.actionLoad_Plugin.setEnabled(True)
+        self.actionUnload_Plugin.setDisabled(True)
+
         
         # A test button...
-        self.pushButton_1.clicked.connect(self.widget.plot)
+
+        self.startButton.clicked.connect(self.unpause_plugin)
+        self.pauseButton.clicked.connect(self.pause_plugin)
+        
+        #self.pushButton_1.clicked.connect(self.widget.plot)
         #self.pushButton_1.clicked.connect(self.load_plugin)
         
     
@@ -44,6 +56,10 @@ class Main(QMainWindow, UiMainWindow):
 
     def do_quit(self, action):
         print("quitting...")
+        # Make sure plugin is unloaded...
+        self.unload_plugin()
+        print("plugin closed")
+        # Close it down
         self.close()
 
     def plugin_menu(self):
@@ -59,10 +75,33 @@ class Main(QMainWindow, UiMainWindow):
         try:
             baseplugin = importlib.import_module(plugin_name)
             my_plugin = baseplugin.load_plugin()
+            self._plugin = my_plugin
+            self.actionLoad_Plugin.setDisabled(True)
+            self.actionUnload_Plugin.setEnabled(True)
+            self._plugin.start()
         except ModuleNotFoundError:
             print("Module not found...")
             # Warning window
-            QMessageBox.warning(self, "Warning", "Plugin not found...")
+            QMessageBox.warning(self, "Warning", "Error loading plugin...")
+
+    def unload_plugin(self):
+        if (self._plugin != None):
+            self._plugin.stop()
+            # clean up other stuff...?
+            del self._plugin
+            self._plugin = None
+
+            self.actionUnload_Plugin.setDisabled(True)
+            self.actionLoad_Plugin.setEnabled(True)
+
+    def pause_plugin(self):
+        if (self._plugin != None):
+            self._plugin.pause()
+
+    def unpause_plugin(self):
+        if (self._plugin != None):
+            self._plugin.unpause()
+        
         
         
 # Load the UI
