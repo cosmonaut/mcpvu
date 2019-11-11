@@ -5,6 +5,7 @@ import numpy as np
 import importlib
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QInputDialog, QMessageBox
+from PyQt5.QtCore import QTimer
 from PyQt5 import QtWidgets
 from PyQt5 import uic
 from PyQt5.uic import loadUiType
@@ -29,6 +30,15 @@ class Main(QMainWindow, UiMainWindow):
         # file that holds names..? search dir? config file?
         self.plugin_list = ["baseplugin"]
 
+        # Data acquisition timer.
+        self._dat_timer = QTimer()
+        self._dat_timer.setInterval(0)
+        self._dat_timer.setSingleShot(False)
+        self._dat_timer.stop()
+        # run function get_data() on timeout
+        self._dat_timer.timeout.connect(self.get_data)
+
+        
         # File/quit
         self.actionQuit.triggered.connect(self.do_quit)
 
@@ -97,10 +107,19 @@ class Main(QMainWindow, UiMainWindow):
     def pause_plugin(self):
         if (self._plugin != None):
             self._plugin.pause()
+            self._dat_timer.stop()
 
     def unpause_plugin(self):
         if (self._plugin != None):
             self._plugin.unpause()
+            self._dat_timer.start()
+
+    def get_data(self):
+        d = self._plugin.get_data()
+        if (d != None):
+            # process data...
+            print(d.len)
+            #print(d.x)
         
         
         
