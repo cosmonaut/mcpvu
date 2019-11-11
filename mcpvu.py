@@ -30,6 +30,9 @@ class Main(QMainWindow, UiMainWindow):
         # file that holds names..? search dir? config file?
         self.plugin_list = ["skeletonplugin", "baseplugin"]
 
+        # Counter for count rate
+        self._cr_counts = 0
+
         # Data acquisition timer.
         self._dat_timer = QTimer()
         self._dat_timer.setInterval(0)
@@ -45,6 +48,16 @@ class Main(QMainWindow, UiMainWindow):
         self._plot_timer.stop()
         # Run replot() on timeout
         self._plot_timer.timeout.connect(self.replot)
+
+        # Count rate timer
+        self._cr_timer = QTimer()
+        self._cr_timer.setInterval(1000)
+        self._cr_timer.setSingleShot(False)
+        self._cr_timer.stop()
+        # Run whatever on timeout
+        self._cr_timer.timeout.connect(self.count_rate)
+
+
 
         # TODO:
         # * remove implotcanvas native from ui in designer.
@@ -123,6 +136,7 @@ class Main(QMainWindow, UiMainWindow):
 
     def unload_plugin(self):
         if (self._plugin != None):
+            self.pause_plugin()
             self._plugin.stop()
             # clean up other stuff...?
             del self._plugin
@@ -138,6 +152,8 @@ class Main(QMainWindow, UiMainWindow):
             #self.widget.clear()
             self._dat_timer.stop()
             self._plot_timer.stop()
+            self._cr_timer.stop()
+            self._cr_counts = 0
             print("plugin paused...")
 
     def unpause_plugin(self):
@@ -146,6 +162,7 @@ class Main(QMainWindow, UiMainWindow):
             self._plugin.unpause()
             self._dat_timer.start()
             self._plot_timer.start()
+            self._cr_timer.start()
             print("plugin running...")
 
     def get_data(self):
@@ -157,10 +174,16 @@ class Main(QMainWindow, UiMainWindow):
             #print(d.len)
             # Append new data to all plots?
             self.widget.append_data(d)
+            self._cr_counts += d.len
 
     def replot(self):
         """Handle refreshing all active plots"""
         self.widget.plot()
+
+    def count_rate(self):
+        """Display count rate"""
+        print("countrate: {0:d}".format(self._cr_counts))
+        self._cr_counts = 0
         
         
         

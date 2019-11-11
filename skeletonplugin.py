@@ -39,7 +39,7 @@ class SkeletonPlugin(BasePlugin):
 
                 continue
 
-            
+
             # Generate random gaussian data for x, y, p
             x = np.random.normal(self._cen, 40, 244)
             x = x.astype(np.uint16)
