@@ -38,6 +38,25 @@ class Main(QMainWindow, UiMainWindow):
         # run function get_data() on timeout
         self._dat_timer.timeout.connect(self.get_data)
 
+        # Replot timer
+        self._plot_timer = QTimer()
+        self._plot_timer.setInterval(100)
+        self._plot_timer.setSingleShot(False)
+        self._plot_timer.stop()
+        # Run replot() on timeout
+        self._plot_timer.timeout.connect(self.replot)
+
+        # TODO:
+        # * remove implotcanvas native from ui in designer.
+        # * add dynamic plot loading and placement per plugin config
+        # * Track master photon list and allow fits file save (one bin table per det segment?)
+        # * Generate phd plot
+        # * Generate count rate history plot
+        # * Live count rate
+        # * Spectrum plot (configurable box per image plot?)
+        # * Image plot adjustable zoom and colormaps?
+        # * implot log scale, rebinning
+
         
         # File/quit
         self.actionQuit.triggered.connect(self.do_quit)
@@ -61,7 +80,6 @@ class Main(QMainWindow, UiMainWindow):
     
     def closeEvent(self, event):
         # safely close anything left...
-        #print("close event")
         pass
 
     def do_quit(self, action):
@@ -86,6 +104,13 @@ class Main(QMainWindow, UiMainWindow):
             baseplugin = importlib.import_module(plugin_name)
             my_plugin = baseplugin.load_plugin()
             self._plugin = my_plugin
+
+            # Get configuration data from plugin
+            plugin_config = self._plugin.get_config()
+            print(plugin_config.segments)
+            # Configure GUI items here...
+            # Load plots etc...
+
             self.actionLoad_Plugin.setDisabled(True)
             self.actionUnload_Plugin.setEnabled(True)
             self._plugin.start()
@@ -105,21 +130,33 @@ class Main(QMainWindow, UiMainWindow):
             self.actionLoad_Plugin.setEnabled(True)
 
     def pause_plugin(self):
+        """Pause plugin"""
         if (self._plugin != None):
             self._plugin.pause()
+            #self.widget.clear()
             self._dat_timer.stop()
+            self._plot_timer.stop()
 
     def unpause_plugin(self):
+        """Unpause plugin"""
         if (self._plugin != None):
             self._plugin.unpause()
             self._dat_timer.start()
+            self._plot_timer.start()
 
     def get_data(self):
+        """Get data from plugin. Called from a GUI timer on a regular
+        interval"""
         d = self._plugin.get_data()
         if (d != None):
             # process data...
             print(d.len)
-            #print(d.x)
+            # Append new data to all plots?
+            self.widget.append_data(d)
+
+    def replot(self):
+        """Handle refreshing all active plots"""
+        self.widget.plot()
         
         
         
