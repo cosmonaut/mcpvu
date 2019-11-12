@@ -42,8 +42,9 @@ class Main(QMainWindow, UiMainWindow):
         self._dat_timer.timeout.connect(self.get_data)
 
         # Replot timer
+        # Note replot timing vs data speed...
         self._plot_timer = QTimer()
-        self._plot_timer.setInterval(100)
+        self._plot_timer.setInterval(500)
         self._plot_timer.setSingleShot(False)
         self._plot_timer.stop()
         # Run replot() on timeout
@@ -71,6 +72,7 @@ class Main(QMainWindow, UiMainWindow):
         # * Spectrum plot (configurable box per image plot?)
         # * Image plot adjustable zoom and colormaps?
         # * implot log scale, rebinning
+        # * Dynamic data vs plot timing adjustment for fast data???
 
         
         # File/quit
@@ -168,13 +170,25 @@ class Main(QMainWindow, UiMainWindow):
     def get_data(self):
         """Get data from plugin. Called from a GUI timer on a regular
         interval"""
-        d = self._plugin.get_data()
-        if (d != None):
-            # process data...
-            #print(d.len)
-            # Append new data to all plots?
-            self.widget.append_data(d)
-            self._cr_counts += d.len
+        # Get expected amount of data in queue
+        n = self._plugin.get_data_len()
+
+        if (n == 0):
+            return
+
+        # Try to get as much as possible without spending too long in
+        # get_data()
+        if (n > 10):
+            n = 10
+
+        for i in range(n):
+            d = self._plugin.get_data()
+            if (d != None):
+                self.widget.append_data(d)
+                self._cr_counts += d.len
+            else:
+                # Just quit if we got a None data -- that implies empty queue
+                return
 
     def replot(self):
         """Handle refreshing all active plots"""
@@ -182,7 +196,8 @@ class Main(QMainWindow, UiMainWindow):
 
     def count_rate(self):
         """Display count rate"""
-        print("countrate: {0:d}".format(self._cr_counts))
+        n = self._plugin.get_data_len()
+        print("countrate: {0:d}, pak: {1:d}".format(self._cr_counts, n))
         self._cr_counts = 0
         
         

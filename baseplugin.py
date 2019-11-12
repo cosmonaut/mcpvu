@@ -65,7 +65,7 @@ class BasePlugin(object):
                 continue
 
             # Fill data object with test fake data
-            print("baseplugin sampler running...")
+            #print("baseplugin sampler running...")
             for i in range(244):
                 self._data.x[i] = i
                 self._data.y[i] = i
@@ -90,6 +90,10 @@ class BasePlugin(object):
             return(d)
         else:
             return(None)
+
+    def get_data_len(self):
+        """Get amount of data in queue"""
+        return(self._q.qsize())
 
 
 # Photon data. Using fixed size numpy arrays right now.
