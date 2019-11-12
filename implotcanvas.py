@@ -2,7 +2,7 @@ import numpy as np
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 # image widget
 # Todo
@@ -10,17 +10,18 @@ import matplotlib.pyplot as plt
 # * Toolbar or pan/zoom
 # * Colormap options
 class implotCanvas(FigureCanvas):
-    def __init__(self, parent = None, xbit = 10, ybit = 10, width = 6, height = 4, dpi = 150):
+    def __init__(self, parent = None, xbit = 10, ybit = 10, width = 6, height = 6, dpi = 150):
 
-        fig = Figure(figsize = (width, height), dpi = dpi)
+        self.fig = Figure(figsize = (width, height), dpi = dpi)
 
         self.xsize = 2**xbit
         self.ysize = 2**ybit
 
+        # Plot data object
         self.data = np.zeros((self.xsize, self.ysize), dtype = np.uint32)
 
-        self.axes = fig.add_subplot()
-        FigureCanvas.__init__(self, fig)
+        self.axes = self.fig.add_subplot()
+        FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
         #         FigureCanvas.setSizePolicy(self,
@@ -28,40 +29,41 @@ class implotCanvas(FigureCanvas):
         #                 QSizePolicy.Expanding)
         #         FigureCanvas.updateGeometry(self)
 
+        # image plot
+        self.im = self.axes.imshow(self.data, origin = 'lower', cmap = 'cubehelix',
+                                   vmin = 0, vmax = 1)
+        self.fig.colorbar(self.im)
+
+        # Handle mouse button presses
+        self.fig.canvas.mpl_connect('button_press_event', self.on_click)
         
-        self.im = self.axes.imshow(self.data, origin = 'lower')
+        #self.plot()
         self.draw()
 
-        #self.d1 = np.arange(4096*4096) % 65535
-        #self.d1 = np.arange(4096*4096).reshape((4096,4096)) % 65535
-        #self.d1 = self.d1.astype(np.uint32)
-
-        #self.d2 = (self.d1 + 65535//2) % 512
-
-        #self.d = [self.d1, self.d2]
-        #self.i = 0
-
     def plot(self):
-        #rn = np.random.randint(low=1, high=100, size=(self.data.shape))
-        #rn = np.zeros(self.data.shape, dtype = np.uint32)
-        #rn = rn + 10
-        #self.data[:] = rn[:]
-        #self.data[:] = self.d[self.i]
-        #self.i = (self.i + 1) % 2
-
+        """Update plot data and redraw plot"""
         # Normal plot()
         self.im.set_data(self.data)
+        # would be nice to use set_clim() for cleared data
         self.im.autoscale()
         self.draw()
 
     def append_data(self, newdata):
+        """Add new plot data but don't redraw/replot"""
         # Add photon by photon...
         for i in range(newdata.len):
             self.data[newdata.y[i], newdata.x[i]] += 1
             # ignore p etc...
 
     def clear(self):
+        """Clear plot data and replot"""
         self.data[:] = 0
+        # or manually replot to set better initial scale
         self.plot()
 
-    
+    def on_click(self, event):
+        #print(event)
+        # In the actual image plot
+        if (event.inaxes == self.axes):
+            print(int(event.xdata), int(event.ydata))
+

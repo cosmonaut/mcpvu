@@ -78,7 +78,7 @@ class Main(QMainWindow, UiMainWindow):
         # File/quit
         self.actionQuit.triggered.connect(self.do_quit)
 
-        # Load Plugin
+        # Load/Unload Plugin
         self.actionLoad_Plugin.triggered.connect(self.plugin_menu)
         self.actionUnload_Plugin.triggered.connect(self.unload_plugin)
 
