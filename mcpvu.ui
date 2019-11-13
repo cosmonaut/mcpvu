@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>821</width>
+    <height>812</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,27 +19,97 @@
      <rect>
       <x>9</x>
       <y>9</y>
-      <width>771</width>
-      <height>531</height>
+      <width>791</width>
+      <height>551</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QFrame" name="control_frame">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>400</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QWidget" name="gridLayoutWidget_2">
+        <property name="geometry">
+         <rect>
+          <x>9</x>
+          <y>4</y>
+          <width>371</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetDefaultConstraint</enum>
+         </property>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="clr_button">
+           <property name="text">
+            <string>Clear</string>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="acq_button">
+           <property name="text">
+            <string>Acquire</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QPushButton" name="mon_button">
+           <property name="text">
+            <string>Monitor</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QPushButton" name="sav_button">
+           <property name="text">
+            <string>Save</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
      <item row="1" column="0">
+      <widget class="implotCanvas" name="widget" native="true"/>
+     </item>
+     <item row="2" column="0">
       <widget class="QPushButton" name="startButton">
        <property name="text">
         <string>DO</string>
        </property>
       </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QPushButton" name="pauseButton">
-       <property name="text">
-        <string>Pause</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="implotCanvas" name="widget" native="true"/>
      </item>
     </layout>
    </widget>
@@ -49,7 +119,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>821</width>
      <height>20</height>
     </rect>
    </property>

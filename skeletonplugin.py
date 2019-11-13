@@ -37,6 +37,9 @@ class SkeletonPlugin(BasePlugin):
                     # End the thread...
                     return
 
+                # while paused do small sleep to keep CPU usage lower
+                time.sleep(0.01)
+
                 continue
 
 

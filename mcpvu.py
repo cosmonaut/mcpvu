@@ -85,11 +85,21 @@ class Main(QMainWindow, UiMainWindow):
         self.actionLoad_Plugin.setEnabled(True)
         self.actionUnload_Plugin.setDisabled(True)
 
+
+        # Control Frame (monitor, acquire, save, clear buttons)
+        self.control_frame.setEnabled(False)
+
+        self.sav_button.setEnabled(False)
+
+        self.mon_button.clicked.connect(self.monitor)
+        self.acq_button.clicked.connect(self.acquire)
+        self.sav_button.clicked.connect(self.save)
+        self.clr_button.clicked.connect(self.clear)
         
         # A test button...
 
-        self.startButton.clicked.connect(self.unpause_plugin)
-        self.pauseButton.clicked.connect(self.pause_plugin)
+        #self.startButton.clicked.connect(self.unpause_plugin)
+        #self.pauseButton.clicked.connect(self.pause_plugin)
         
         #self.pushButton_1.clicked.connect(self.widget.plot)
         #self.pushButton_1.clicked.connect(self.load_plugin)
@@ -118,6 +128,7 @@ class Main(QMainWindow, UiMainWindow):
     def load_plugin(self, plugin_name):
         print("Loading plugin...")
         try:
+            self.clear()
             baseplugin = importlib.import_module(plugin_name)
             my_plugin = baseplugin.load_plugin()
             self._plugin = my_plugin
@@ -131,6 +142,7 @@ class Main(QMainWindow, UiMainWindow):
             self.actionLoad_Plugin.setDisabled(True)
             self.actionUnload_Plugin.setEnabled(True)
             self._plugin.start()
+            self.control_frame.setEnabled(True)
         except ModuleNotFoundError:
             print("Module not found...")
             # Warning window
@@ -146,6 +158,17 @@ class Main(QMainWindow, UiMainWindow):
 
             self.actionUnload_Plugin.setDisabled(True)
             self.actionLoad_Plugin.setEnabled(True)
+            self.control_frame.setEnabled(False)
+
+            # Reset buttons
+            self.mon_button.setChecked(False)
+            self.acq_button.setChecked(False)
+            self.sav_button.setChecked(False)
+
+            self.mon_button.setEnabled(True)
+            self.acq_button.setEnabled(True)
+            self.clr_button.setEnabled(True)
+            self.sav_button.setEnabled(True)
 
     def pause_plugin(self):
         """Pause plugin"""
@@ -157,6 +180,9 @@ class Main(QMainWindow, UiMainWindow):
             self._cr_timer.stop()
             self._cr_counts = 0
             print("plugin paused...")
+            return(True)
+
+        return(False)
 
     def unpause_plugin(self):
         """Unpause plugin"""
@@ -166,6 +192,9 @@ class Main(QMainWindow, UiMainWindow):
             self._plot_timer.start()
             self._cr_timer.start()
             print("plugin running...")
+            return(True)
+
+        return(False)
 
     def get_data(self):
         """Get data from plugin. Called from a GUI timer on a regular
@@ -199,7 +228,52 @@ class Main(QMainWindow, UiMainWindow):
         n = self._plugin.get_data_len()
         print("countrate: {0:d}, pak: {1:d}".format(self._cr_counts, n))
         self._cr_counts = 0
+
+    def monitor(self):
+        """Display data but don't store data for save"""
+        if (self.mon_button.isChecked()):
+            # unpausing
+            status = self.unpause_plugin()
+            if (status != True):
+                self.mon_button.setChecked(False)
+            else:
+                self.acq_button.setEnabled(False)
+        else:
+            # pausing
+            status = self.pause_plugin()
+            if (status != True):
+                self.mon_button.setChecked(True)
+            else:
+                self.acq_button.setEnabled(True)
+
+    def acquire(self):
+        # Clear data first...
+        self.clear()
         
+        """Display data and hold master photon list for data saving"""
+        if (self.acq_button.isChecked()):
+            # unpausing
+            status = self.unpause_plugin()
+            if (status != True):
+                self.acq_button.setChecked(False)
+            else:
+                self.mon_button.setEnabled(False)
+        else:
+            # pausing
+            status = self.pause_plugin()
+            if (status != True):
+                self.acq_button.setChecked(True)
+            else:
+                self.mon_button.setEnabled(True)
+
+    def clear(self):
+        """Clear all data/plots"""
+        self.widget.clear()
+
+    def save(self):
+        """Save acquired detector data"""
+        # astropy.io.fits...
+        print("Save not yet implemented")
         
         
 # Load the UI
@@ -211,7 +285,6 @@ class Ui(QMainWindow):
         uic.loadUi(UIFILE, self)
         # Show the GUI
         self.show()
-
         
 
 def main():
