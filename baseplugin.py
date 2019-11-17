@@ -2,12 +2,85 @@ import threading
 import queue
 import time
 import numpy as np
+from implotwidget import ImplotWidget
+
+
+
+# Photon data. Using fixed size numpy arrays right now.
+class PhotonData(object):
+    def __init__(self, chunksize = 244):
+        # x, y, and pulse height
+        self.x = np.zeros(chunksize, dtype = np.uint16)
+        self.y = np.zeros(chunksize, dtype = np.uint16)
+        self.p = np.zeros(chunksize, dtype = np.uint16)
+        #self.seg = np.zeros(chunksize, dtype = np.uint8)
+        # index of detector segment (one segment per photondata chunk)
+        self.segment = 0
+        # Number of valid items in data
+        self.len = 0
+
+
+class PluginConfig(object):
+    def __init__(self):
+        """Configuration for each detector segment
+        xbits, ybits, and pbits must have length that matches segments"""
+
+        # Segment configurations
+        self.segment_configs = [SegmentConfig(xbit = 8, ybit = 8, pbit = 8, segment = 0)]
+
+        # Plot configurations
+        self.plots = [PluginPlotItem()]
+
+        # # Number of X bits per segment
+        # self.xbits = [8]
+        # # Number of Y bits per segment
+        # self.ybits = [8]
+        # # Number of pulse height bits per segment
+        # self.pbits = [8]
+        # # Number of detector segments
+        # self.segments = 1
+
+        # # Plot item config
+        # #self.plots = [PluginPlotItem(row = 0, column = 0, row_span = 1, column_span = 1, segment = 0)]
+        # self.plot = []
+
+
+class SegmentConfig(object):
+    def __init__(self, xbit = 8, ybit = 8, pbit = 8, segment = 0):
+        """Configuration for a detector segment"""
+        self.xbit = xbit
+        self.ybit = ybit
+        self.pbit = pbit
+        self.segment = segment
+
+
+class PlotConfig(object):
+    def __init__(self, xbit = 8, ybit = 8, pbit = 8, segment = 0):
+        """Configuration for a single plot"""
+        self.xbit = xbit
+        self.ybit = ybit
+        self.pbit = pbit
+        self.segment = segment
+
+
+class PluginPlotItem(object):
+    def __init__(self, plot_config = PlotConfig(), name = ImplotWidget, row = 0, column = 0, row_span = 1,
+                 column_span = 1, segment = 0):
+        """Plot item configuration"""
+        self.name = ImplotWidget
+        self.row = row
+        self.column = column
+        self.row_span = row_span
+        self.column_span = column_span
+        self.plot_config = plot_config
+
 
 # Base plugin. All plugins should inherit this class.
 class BasePlugin(object):
     def __init__(self):
         """Base plugin class"""
         self._config = PluginConfig()
+        #self._config = config
 
         # Data
         self._data = PhotonData()
@@ -70,7 +143,7 @@ class BasePlugin(object):
                 self._data.x[i] = i
                 self._data.y[i] = i
                 self._data.p[i] = i
-                self._data.seg[i] = 0
+                self._data.segment = 0
             self._data.len = 244
             # Queue up the data...
             self._q.put(self._data)
@@ -94,32 +167,6 @@ class BasePlugin(object):
     def get_data_len(self):
         """Get amount of data in queue"""
         return(self._q.qsize())
-
-
-# Photon data. Using fixed size numpy arrays right now.
-class PhotonData(object):
-    def __init__(self, chunksize = 244):
-        self.x = np.zeros(chunksize, dtype = np.uint16)
-        self.y = np.zeros(chunksize, dtype = np.uint16)
-        self.p = np.zeros(chunksize, dtype = np.uint16)
-        # index of detector segment
-        self.seg = np.zeros(chunksize, dtype = np.uint8)
-        # Number of valid items in data
-        self.len = 0
-        
-    
-class PluginConfig(object):
-    def __init__(self):
-        """Configuration for each detector segment
-        xbits, ybits, and pbits must have length that matches segments"""
-        # Number of X bits per segment
-        self.xbits = [8]
-        # Number of Y bits per segment
-        self.ybits = [8]
-        # Number of pulse height bits per segment
-        self.pbits = [8]
-        # Number of detector segments
-        self.segments = 1
 
         
 def load_plugin():

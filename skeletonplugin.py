@@ -1,4 +1,5 @@
-from baseplugin import BasePlugin
+from baseplugin import BasePlugin, PluginPlotItem, SegmentConfig, PluginConfig, PlotConfig
+from implotwidget import ImplotWidget
 import numpy as np
 import time
 
@@ -12,14 +13,30 @@ PAK_SIZE = 244
 class SkeletonPlugin(BasePlugin):
     def __init__(self):
         BasePlugin.__init__(self)
-
         # New config: 10 bit x and y (1024x1024).
         # 8 bit pulse height.
         # One segment
-        self._config.segments = 1
-        self._config.xbits = [IM_BITS]
-        self._config.ybits = [IM_BITS]
-        self._config.pbits = [PHD_BITS]
+
+        # Overwrite config
+        self._config = PluginConfig()
+
+        # Segment configurations
+        self._config.segment_configs = [SegmentConfig(xbit = IM_BITS, ybit = IM_BITS, pbit = PHD_BITS, segment = 0)]
+
+        # Plot configurations
+        pc = PlotConfig(xbit = IM_BITS, ybit = IM_BITS, pbit = PHD_BITS, segment = 0)
+        print(pc.xbit)
+        self._config.plots = [PluginPlotItem(plot_config = pc, name = ImplotWidget, row = 0, column = 0,
+                                             row_span = 1, column_span = 1, segment = 0)]
+
+
+        # self._config.segments = 1
+        # self._config.xbits = [IM_BITS]
+        # self._config.ybits = [IM_BITS]
+        # self._config.pbits = [PHD_BITS]
+        # self._config.plots = [PluginPlotItem(name = ImplotWidget, row = 0, column = 0,
+        #                                      row_span = 1, column_span = 1, segment = 0,
+        #                                      xbit = 10. ybit = 10, pbit = 8)]
 
         # For random number generation...
         self._cen = (2**IM_BITS)//2
@@ -53,13 +70,14 @@ class SkeletonPlugin(BasePlugin):
             p = np.random.normal(self._pcen, 40, 244)
             p = p.astype(np.uint8)
             #p[(p > 255)] = 255
-            s = np.zeros(244, dtype = np.uint8)
+            #s = np.zeros(244, dtype = np.uint8)
+            s = 0
 
             # Populate data object
             self._data.x[:] = x[:]
             self._data.y[:] = y[:]
             self._data.p[:] = p[:]
-            self._data.seg[:] = s[:]
+            self._data.segment = s
             self._data.len = 244
             
             # Queue up the data...

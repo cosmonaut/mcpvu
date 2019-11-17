@@ -9,10 +9,17 @@ from matplotlib.figure import Figure
 # * Log scaling
 # * Toolbar or pan/zoom
 # * Colormap options
-class implotCanvas(FigureCanvas):
-    def __init__(self, parent = None, xbit = 10, ybit = 10, width = 6, height = 6, dpi = 150):
+class ImplotWidget(FigureCanvas):
+    def __init__(self, plugin_config, plot_config, parent = None, width = 6, height = 6, dpi = 150):
 
         self.fig = Figure(figsize = (width, height), dpi = dpi)
+
+        self.segment = plot_config.segment
+
+        #xbit = plugin_config.xbits[plugin_config.plots]
+        #ybit = plugin_config.ybits[plugin_config.segment]
+        xbit = plot_config.xbit
+        ybit = plot_config.ybit
 
         self.xsize = 2**xbit
         self.ysize = 2**ybit
@@ -51,9 +58,11 @@ class implotCanvas(FigureCanvas):
     def append_data(self, newdata):
         """Add new plot data but don't redraw/replot"""
         # Add photon by photon...
-        for i in range(newdata.len):
-            self.data[newdata.y[i], newdata.x[i]] += 1
-            # ignore p etc...
+
+        if (newdata.segment == self.segment):
+            for i in range(newdata.len):
+                self.data[newdata.y[i], newdata.x[i]] += 1
+                # ignore p etc...
 
     def clear(self):
         """Clear plot data and replot"""

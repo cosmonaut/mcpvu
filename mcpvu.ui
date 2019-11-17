@@ -101,14 +101,32 @@
        </widget>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="implotCanvas" name="widget" native="true"/>
-     </item>
      <item row="2" column="0">
       <widget class="QPushButton" name="startButton">
        <property name="text">
         <string>DO</string>
        </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QFrame" name="plot_frame">
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QWidget" name="gridLayoutWidget_3">
+        <property name="geometry">
+         <rect>
+          <x>5</x>
+          <y>5</y>
+          <width>781</width>
+          <height>466</height>
+         </rect>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_plots"/>
+       </widget>
       </widget>
      </item>
     </layout>
@@ -156,14 +174,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>implotCanvas</class>
-   <extends>QWidget</extends>
-   <header>implotcanvas.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -33,6 +33,9 @@ class Main(QMainWindow, UiMainWindow):
         # Counter for count rate
         self._cr_counts = 0
 
+        # Plot objects
+        self._plots = []
+
         # Data acquisition timer.
         self._dat_timer = QTimer()
         self._dat_timer.setInterval(0)
@@ -101,10 +104,6 @@ class Main(QMainWindow, UiMainWindow):
         #self.startButton.clicked.connect(self.unpause_plugin)
         #self.pauseButton.clicked.connect(self.pause_plugin)
         
-        #self.pushButton_1.clicked.connect(self.widget.plot)
-        #self.pushButton_1.clicked.connect(self.load_plugin)
-        
-    
     def closeEvent(self, event):
         # safely close anything left...
         pass
@@ -135,9 +134,15 @@ class Main(QMainWindow, UiMainWindow):
 
             # Get configuration data from plugin
             plugin_config = self._plugin.get_config()
-            print(plugin_config.segments)
+            #print(plugin_config.segments)
             # Configure GUI items here...
             # Load plots etc...
+            for pc in plugin_config.plots:
+                # plot object
+                plot = pc.name(plugin_config, pc.plot_config)
+                self._plots.append(plot)
+                self.gridLayout_plots.addWidget(plot, pc.row, pc.column,
+                                                pc.row_span, pc.column_span)
 
             self.actionLoad_Plugin.setDisabled(True)
             self.actionUnload_Plugin.setEnabled(True)
@@ -155,6 +160,13 @@ class Main(QMainWindow, UiMainWindow):
             # clean up other stuff...?
             del self._plugin
             self._plugin = None
+
+            for plot in self._plots:
+                self.gridLayout_plots.removeWidget(plot)
+                plot.deleteLater()
+                plot = None
+
+            self._plots = []
 
             self.actionUnload_Plugin.setDisabled(True)
             self.actionLoad_Plugin.setEnabled(True)
@@ -213,7 +225,9 @@ class Main(QMainWindow, UiMainWindow):
         for i in range(n):
             d = self._plugin.get_data()
             if (d != None):
-                self.widget.append_data(d)
+                #self.widget.append_data(d)
+                for plot in self._plots:
+                    plot.append_data(d)
                 self._cr_counts += d.len
             else:
                 # Just quit if we got a None data -- that implies empty queue
@@ -221,7 +235,9 @@ class Main(QMainWindow, UiMainWindow):
 
     def replot(self):
         """Handle refreshing all active plots"""
-        self.widget.plot()
+        #self.widget.plot()
+        for plot in self._plots:
+            plot.plot()
 
     def count_rate(self):
         """Display count rate"""
@@ -268,7 +284,10 @@ class Main(QMainWindow, UiMainWindow):
 
     def clear(self):
         """Clear all data/plots"""
-        self.widget.clear()
+        #self.widget.clear()
+        #pass
+        for plot in self._plots:
+            plot.clear()
 
     def save(self):
         """Save acquired detector data"""
