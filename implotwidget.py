@@ -67,8 +67,11 @@ class ImplotWidget(FigureCanvas):
     def clear(self):
         """Clear plot data and replot"""
         self.data[:] = 0
-        # or manually replot to set better initial scale
-        self.plot()
+        #self.plot()
+        # Manual replot allows for better initial scaling...
+        self.im.set_data(self.data)
+        self.im.set_clim(0, 1)
+        self.draw()
 
     def on_click(self, event):
         #print(event)
