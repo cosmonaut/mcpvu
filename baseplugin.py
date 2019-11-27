@@ -67,7 +67,7 @@ class PluginPlotItem(object):
     def __init__(self, plot_config = PlotConfig(), name = ImplotWidget, row = 0, column = 0, row_span = 1,
                  column_span = 1, segment = 0):
         """Plot item configuration"""
-        self.name = ImplotWidget
+        self.name = name
         self.row = row
         self.column = column
         self.row_span = row_span

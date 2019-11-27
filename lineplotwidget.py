@@ -1,31 +1,33 @@
 import numpy as np
 
+from PyQt5.QtCore import QTimer
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-# image widget
+# line plot widget
 # Todo
-# * Log scaling
-# * Toolbar or pan/zoom
-# * Colormap options
-class ImplotWidget(FigureCanvas):
-    def __init__(self, plugin_config, plot_config, parent = None, width = 6, height = 6, dpi = 150):
+# * multiple segments?
+class LineplotWidget(FigureCanvas):
+    def __init__(self, plugin_config, plot_config, parent = None, width = 3, height = 3, dpi = 150):
 
         self.fig = Figure(figsize = (width, height), dpi = dpi)
         self.fig.tight_layout()
+
+        # Count rate timer
+        self._timer = QTimer()
+        self._timer.setInterval(1000)
+        self._timer.setSingleShot(False)
+        self._timer.timeout.connect(self.count_rate)
+        self._timer.start()
         
         self.segment = plot_config.segment
 
-        #xbit = plugin_config.xbits[plugin_config.plots]
-        #ybit = plugin_config.ybits[plugin_config.segment]
-        xbit = plot_config.xbit
-        ybit = plot_config.ybit
-
-        self.xsize = 2**xbit
-        self.ysize = 2**ybit
-
+        self.c = 0
+        
         # Plot data object
-        self.data = np.zeros((self.xsize, self.ysize), dtype = np.uint32)
+        self.data = np.zeros(120, dtype = np.uint32)
+        self.xdata = np.arange(119, -1, -1)
 
         self.axes = self.fig.add_subplot()
         FigureCanvas.__init__(self, self.fig)
@@ -36,11 +38,11 @@ class ImplotWidget(FigureCanvas):
         #                 QSizePolicy.Expanding)
         #         FigureCanvas.updateGeometry(self)
 
-        # image plot
-        self.im = self.axes.imshow(self.data, origin = 'lower', cmap = 'cubehelix',
-                                   vmin = 0, vmax = 1)
-        self.fig.colorbar(self.im)
-
+        # Line plot
+        self.lplot = self.axes.plot(self.xdata, self.data, color = 'black', ds = 'steps-mid')
+        self.axes.set_xlim(120, 0)
+        #self.axes.set_ylim(0, 1)
+        
         # Handle mouse button presses
         self.fig.canvas.mpl_connect('button_press_event', self.on_click)
         
@@ -50,9 +52,11 @@ class ImplotWidget(FigureCanvas):
     def plot(self):
         """Update plot data and redraw plot"""
         # Normal plot()
-        self.im.set_data(self.data)
+        self.lplot[0].set_ydata(self.data)
         # would be nice to use set_clim() for cleared data
-        self.im.autoscale()
+        #self.lplot[0].autoscale()
+        self.axes.relim()
+        self.axes.autoscale_view()
         self.draw()
 
     def append_data(self, newdata):
@@ -60,22 +64,28 @@ class ImplotWidget(FigureCanvas):
         # Add photon by photon...
 
         if (newdata.segment == self.segment):
-            for i in range(newdata.len):
-                self.data[newdata.y[i], newdata.x[i]] += 1
-                # ignore p etc...
+            #self.c += self.data.len
+            self.c += newdata.len
+        
+    def count_rate(self):
+        #self.c = 0
+        self.data = np.roll(self.data, -1)
+        self.data[-1] = self.c
+        self.c = 0
 
     def clear(self):
         """Clear plot data and replot"""
         self.data[:] = 0
         #self.plot()
         # Manual replot allows for better initial scaling...
-        self.im.set_data(self.data)
-        self.im.set_clim(0, 1)
+        self.lplot[0].set_ydata(self.data)
+        #self.axes.set_ylim(0, 1)
+        #self.im.set_clim(0, 1)
         self.draw()
 
     def on_click(self, event):
         #print(event)
-        # In the actual image plot
+        # Print event in plot
         if (event.inaxes == self.axes):
             print(int(event.xdata), int(event.ydata))
 
