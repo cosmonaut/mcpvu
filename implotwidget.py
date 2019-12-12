@@ -10,7 +10,7 @@ class ImplotWidgetCont(QFrame):
     def __init__(self, plugin_config, plot_config, parent = None, width = 6, height = 6, dpi = 150):
         super(ImplotWidgetCont, self).__init__(parent = parent)
 
-        self.setFrameStyle(QFrame.Box | QFrame.Raised);
+        self.setFrameStyle(QFrame.Box | QFrame.Plain);
 
         self.layout = QVBoxLayout()
 
@@ -186,10 +186,6 @@ class ImplotWidget(FigureCanvas):
             self.im.set_norm(norm)
             self.plot()
         elif (norm_name == "Log"):
-            # TODO -- fix issue with setting norm then autoscaling (ValueError positive etc...)
-            #raise ValueError("values must all be positive")
-
-            #pass
             self.norm = norm_name
             dmax = self.data.max()
             if (dmax <= 1.0):
