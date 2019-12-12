@@ -1,14 +1,18 @@
 import sys
 
 import numpy as np
-
 import importlib
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QInputDialog, QMessageBox
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5 import QtWidgets
 from PyQt5 import uic
 from PyQt5.uic import loadUiType
+
+import astropy.io.fits as pf
+from datetime import datetime
+from datetime import timezone
+
 
 # from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 # from matplotlib.figure import Figure
@@ -36,6 +40,11 @@ class Main(QMainWindow, UiMainWindow):
         # Plot objects
         self._plots = []
 
+        # Photon Data container
+        self.phot_data = []
+        self.phot_tstamps = []
+        self.obs_date = datetime.now()
+
         # Data acquisition timer.
         self._dat_timer = QTimer()
         self._dat_timer.setInterval(0)
@@ -62,17 +71,15 @@ class Main(QMainWindow, UiMainWindow):
         self._cr_timer.timeout.connect(self.count_rate)
 
 
-
         # TODO:
         # * text file that contains loadable plugins for menu... (with gen script?)
         # * real detector plugin...
-        # * Track master photon list and allow fits file save (one bin table per det segment?)
         # * Generate phd plot
         # * Generate count rate history plot
         # * Live count rate
         # * Spectrum plot (configurable box per image plot?)
         # * Image plot adjustable zoom and colormaps?
-        # * implot log scale, rebinning
+        # * implot rebinning
         # * Dynamic data vs plot timing adjustment for fast data???
 
         
@@ -146,6 +153,16 @@ class Main(QMainWindow, UiMainWindow):
             self.actionUnload_Plugin.setEnabled(True)
             self._plugin.start()
             self.control_frame.setEnabled(True)
+
+            # Reset buttons
+            self.mon_button.setChecked(False)
+            self.acq_button.setChecked(False)
+            self.sav_button.setChecked(False)
+
+            self.mon_button.setEnabled(True)
+            self.acq_button.setEnabled(True)
+            self.clr_button.setEnabled(True)
+            self.sav_button.setEnabled(False)
         except ModuleNotFoundError:
             print("Module not found...")
             # Warning window
@@ -227,6 +244,11 @@ class Main(QMainWindow, UiMainWindow):
                 for plot in self._plots:
                     plot.append_data(d)
                 self._cr_counts += d.len
+
+                if (self.acq_button.isChecked()):
+                    self.phot_data.append(d)
+                    tstamp = datetime.now() - self.obs_date
+                    self.phot_tstamps.append(tstamp.total_seconds())
             else:
                 # Just quit if we got a None data -- that implies empty queue
                 return
@@ -261,17 +283,20 @@ class Main(QMainWindow, UiMainWindow):
                 self.acq_button.setEnabled(True)
 
     def acquire(self):
-        # Clear data first...
-        self.clear()
-        
         """Display data and hold master photon list for data saving"""
+
         if (self.acq_button.isChecked()):
             # unpausing
+
+            # Clear data first...
+            self.clear()
+
             status = self.unpause_plugin()
             if (status != True):
                 self.acq_button.setChecked(False)
             else:
                 self.mon_button.setEnabled(False)
+                self.obs_date = datetime.now()
         else:
             # pausing
             status = self.pause_plugin()
@@ -279,18 +304,104 @@ class Main(QMainWindow, UiMainWindow):
                 self.acq_button.setChecked(True)
             else:
                 self.mon_button.setEnabled(True)
+                self.sav_button.setEnabled(True)
 
     def clear(self):
         """Clear all data/plots"""
-        #self.widget.clear()
-        #pass
+        # Clear stored photon data
+        self.phot_data.clear()
+        self.phot_tstamps.clear()
+
+        # Clear plots
         for plot in self._plots:
             plot.clear()
 
     def save(self):
-        """Save acquired detector data"""
-        # astropy.io.fits...
-        print("Save not yet implemented")
+        """Save acquired detector data in fits format"""
+        print("Save  partially implemented")
+        print("Total packets: {0:d}".format(len(self.phot_data)))
+
+        # Busy cursor
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+
+        # Config with needed info...
+        plugin_config = self._plugin.get_config()
+
+        utcobs = self.obs_date.replace(tzinfo = timezone.utc)
+        fname = utcobs.strftime("%Y-%m-%d-%H%M%S") + ".fits"
+
+        # Number of binary tables to make (per segment)
+        n_segs = len(plugin_config.segment_configs)
+
+        # Sets of arrays to hold photon data per segment
+        xarrs = [[] for seg in range(n_segs)]
+        yarrs = [[] for seg in range(n_segs)]
+        parrs = [[] for seg in range(n_segs)]
+        tarrs = [[] for seg in range(n_segs)]
+
+        # Names and units for all table columns
+        xname = "X"
+        yname = "Y"
+        pname = "P"
+        tname = "T"
+
+        xform = "1I"
+        yform = "1I"
+        pform = "1I"
+        tform = "1D"
+
+        xunit = "pixels"
+        yunit = "pixels"
+        punit = "pixels"
+        tunit = "seconds"
+
+        # generate data arrays
+        for pkt, ts in zip(self.phot_data, self.phot_tstamps):
+            idx = pkt.segment
+            xarrs[idx].extend(pkt.x[0:pkt.len])
+            yarrs[idx].extend(pkt.y[0:pkt.len])
+            parrs[idx].extend(pkt.p[0:pkt.len])
+            tarrs[idx].extend([ts]*pkt.len)
+
+        # hdu list (add primary at start)
+        hdul = []
+        hdup = pf.PrimaryHDU()
+        hdup.header['PROGRAM'] = ("mcpvu.py -- written by Nicholas Nell (nicholas.nell@colorado.edu)")
+        hdup.header['VERSION'] = ("0.1", "program version")
+        hdup.header['INSTRMNT'] = ('mcpvu', "Instrument name (not implemented)")
+        hdup.header['DETECTOR'] = ("MCP", "Detector type")
+        hdup.header['SEGMENTS'] = ("{0:d}".format(n_segs), "Number of segments")
+        hdup.header['DATEOBS'] = (utcobs.strftime("%Y-%m-%d %H:%M:%S %Z%z"), "UTC")
+        hdup.header['EXPOSURE'] = ("0", "Exposure time (seconds)")
+
+        hdul.append(hdup)
+
+        # Create columns and hdu for each segment
+        for seg in range(n_segs):
+            # generate column definitions (per segment)
+            colx = pf.Column(name = xname, format = xform, unit = xunit, array = xarrs[seg])
+            coly = pf.Column(name = yname, format = yform, unit = yunit, array = yarrs[seg])
+            colp = pf.Column(name = pname, format = pform, unit = punit, array = parrs[seg])
+            colt = pf.Column(name = tname, format = tform, unit = tunit, array = tarrs[seg])
+            col_defs = pf.ColDefs([colx, coly, colp, colt])
+            # Generate HDU for each segment
+            hdul.append(pf.BinTableHDU.from_columns(col_defs))
+            hdul[-1].header['SEGMENT'] = ("{0:d}".format(seg), "Detector segment")
+            hdul[-1].header['SEGNAME'] = ("{0:d}".format(seg), "Segment name")
+            hdul[-1].header['XBITS'] = ("{0:d}".format(plugin_config.segment_configs[idx].xbit), "X bits")
+            hdul[-1].header['YBITS'] = ("{0:d}".format(plugin_config.segment_configs[idx].ybit), "Y bits")
+            hdul[-1].header['PBITS'] = ("{0:d}".format(plugin_config.segment_configs[idx].pbit), "Pulse height bits")
+
+        # Save fits file
+        hdul = pf.HDUList(hdul)
+        hdul.writeto(fname)
+
+        # Finish up...
+        self.sav_button.setEnabled(False)
+        self.sav_button.setChecked(False)
+
+        QApplication.restoreOverrideCursor()
+
         
         
 # Load the UI
