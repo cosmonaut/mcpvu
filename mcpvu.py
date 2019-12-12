@@ -64,8 +64,6 @@ class Main(QMainWindow, UiMainWindow):
 
 
         # TODO:
-        # * remove implotcanvas native from ui in designer.
-        # * add dynamic plot loading and placement per plugin config
         # * text file that contains loadable plugins for menu... (with gen script?)
         # * real detector plugin...
         # * Track master photon list and allow fits file save (one bin table per det segment?)
