@@ -12,7 +12,7 @@ class LineplotWidget(FigureCanvas):
     def __init__(self, plugin_config, plot_config, parent = None, width = 3, height = 3, dpi = 150):
 
         self.fig = Figure(figsize = (width, height), dpi = dpi)
-        self.fig.tight_layout()
+        #self.fig.tight_layout()
 
         # Count rate timer
         self._timer = QTimer()
@@ -42,6 +42,9 @@ class LineplotWidget(FigureCanvas):
         self.lplot = self.axes.plot(self.xdata, self.data, color = 'black', ds = 'steps-mid')
         self.axes.set_xlim(120, 0)
         #self.axes.set_ylim(0, 1)
+
+        #self.lplot.set_grid(True)
+        self.axes.grid(True)
         
         # Handle mouse button presses
         self.fig.canvas.mpl_connect('button_press_event', self.on_click)

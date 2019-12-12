@@ -1,3 +1,5 @@
+# Live image plotting with Z colormap
+
 import numpy as np
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -72,9 +74,8 @@ class ImplotWidgetCont(QFrame):
 
 # image widget
 # Todo
-# * Log scaling
 # * Toolbar or pan/zoom
-# * Colormap options
+# * rebin code
 class ImplotWidget(FigureCanvas):
     def __init__(self, plugin_config, plot_config, parent = None, width = 6, height = 6, dpi = 150):
 
