@@ -9,7 +9,7 @@ from matplotlib.figure import Figure
 # Todo
 # * multiple segments?
 class LineplotWidget(FigureCanvas):
-    def __init__(self, plugin_config, plot_config, parent = None, width = 3, height = 3, dpi = 150):
+    def __init__(self, plugin_config, plot_config, parent = None, width = 3, height = 3, dpi = 100):
 
         self.fig = Figure(figsize = (width, height), dpi = dpi)
         #self.fig.tight_layout()

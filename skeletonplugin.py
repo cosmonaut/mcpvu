@@ -2,6 +2,7 @@ from baseplugin import BasePlugin, PluginPlotItem, SegmentConfig, PluginConfig, 
 from implotwidget import ImplotWidget
 from implotwidget import ImplotWidgetCont
 from lineplotwidget import LineplotWidget
+from phdplotwidget import PHDPlotWidgetCont
 import numpy as np
 import time
 
@@ -30,7 +31,9 @@ class SkeletonPlugin(BasePlugin):
         print(pc.xbit)
         self._config.plots = [PluginPlotItem(plot_config = pc, name = ImplotWidgetCont, row = 0, column = 0,
                                              row_span = 1, column_span = 1, segment = 0),
-                                PluginPlotItem(plot_config = pc, name = LineplotWidget, row = 1, column = 0,
+                              PluginPlotItem(plot_config = pc, name = PHDPlotWidgetCont, row = 0, column = 1,
+                                             row_span = 1, column_span = 1, segment = 0),
+                              PluginPlotItem(plot_config = pc, name = LineplotWidget, row = 1, column = 0,
                                              row_span = 1, column_span = 2, segment = 0)]
 
 

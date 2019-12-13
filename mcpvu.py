@@ -296,6 +296,7 @@ class Main(QMainWindow, UiMainWindow):
                 self.acq_button.setChecked(False)
             else:
                 self.mon_button.setEnabled(False)
+                self.clr_button.setEnabled(False)
                 self.obs_date = datetime.now()
         else:
             # pausing
@@ -305,12 +306,16 @@ class Main(QMainWindow, UiMainWindow):
             else:
                 self.mon_button.setEnabled(True)
                 self.sav_button.setEnabled(True)
+                self.clr_button.setEnabled(True)
 
     def clear(self):
         """Clear all data/plots"""
         # Clear stored photon data
         self.phot_data.clear()
         self.phot_tstamps.clear()
+        # Disable save if there was data...
+        if (self.sav_button.isEnabled()):
+            self.sav_button.setEnabled(False)
 
         # Clear plots
         for plot in self._plots:

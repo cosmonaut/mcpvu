@@ -9,7 +9,7 @@ from matplotlib.colors import LogNorm, PowerNorm, Normalize
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QWidget
 
 class ImplotWidgetCont(QFrame):
-    def __init__(self, plugin_config, plot_config, parent = None, width = 6, height = 6, dpi = 150):
+    def __init__(self, plugin_config, plot_config, parent = None, width = 6, height = 6, dpi = 100):
         super(ImplotWidgetCont, self).__init__(parent = parent)
 
         self.setFrameStyle(QFrame.Box | QFrame.Plain);
@@ -37,7 +37,7 @@ class ImplotWidgetCont(QFrame):
 
         self.bt_layout.addWidget(QLabel("Scale: "))
         self.sc_combo = QComboBox()
-        self.sc_combo.addItems(["Sqrt", "Linear", "Log"])
+        self.sc_combo.addItems(["Sqrt", "Log", "Linear"])
         self.bt_layout.addWidget(self.sc_combo)
         self.sc_combo.currentTextChanged.connect(self.norm_update)
 
@@ -77,7 +77,7 @@ class ImplotWidgetCont(QFrame):
 # * Toolbar or pan/zoom
 # * rebin code
 class ImplotWidget(FigureCanvas):
-    def __init__(self, plugin_config, plot_config, parent = None, width = 6, height = 6, dpi = 150):
+    def __init__(self, plugin_config, plot_config, parent = None, width = 4, height = 4, dpi = 100):
 
         self.fig = Figure(figsize = (width, height), dpi = dpi)
         #self.fig.tight_layout()
