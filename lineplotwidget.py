@@ -1,6 +1,7 @@
 import numpy as np
 
 from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QSizePolicy
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -9,7 +10,7 @@ from matplotlib.figure import Figure
 # Todo
 # * multiple segments?
 class LineplotWidget(FigureCanvas):
-    def __init__(self, plugin_config, plot_config, parent = None, width = 3, height = 3, dpi = 100):
+    def __init__(self, plugin_config, plot_config, parent = None, width = 6, height = 2, dpi = 100):
 
         self.fig = Figure(figsize = (width, height), dpi = dpi)
         #self.fig.tight_layout()
@@ -33,10 +34,10 @@ class LineplotWidget(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        #         FigureCanvas.setSizePolicy(self,
-        #                 QSizePolicy.Expanding,
-        #                 QSizePolicy.Expanding)
-        #         FigureCanvas.updateGeometry(self)
+        FigureCanvas.setSizePolicy(self,
+                                   QSizePolicy.Maximum,
+                                   QSizePolicy.Maximum)
+        FigureCanvas.updateGeometry(self)
 
         # Line plot
         self.lplot = self.axes.plot(self.xdata, self.data, color = 'black', ds = 'steps-mid')

@@ -74,7 +74,6 @@ class Main(QMainWindow, UiMainWindow):
         # TODO:
         # * text file that contains loadable plugins for menu... (with gen script?)
         # * real detector plugin...
-        # * Generate phd plot
         # * Generate count rate history plot
         # * Live count rate
         # * Spectrum plot (configurable box per image plot?)
@@ -103,11 +102,6 @@ class Main(QMainWindow, UiMainWindow):
         self.acq_button.clicked.connect(self.acquire)
         self.sav_button.clicked.connect(self.save)
         self.clr_button.clicked.connect(self.clear)
-        
-        # A test button...
-
-        #self.startButton.clicked.connect(self.unpause_plugin)
-        #self.pauseButton.clicked.connect(self.pause_plugin)
         
     def closeEvent(self, event):
         # safely close anything left...

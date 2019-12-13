@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from PyQt5.QtWidgets import QFrame, QVBoxLayout
+from PyQt5.QtWidgets import QFrame, QVBoxLayout, QSizePolicy
 
 class PHDPlotWidgetCont(QFrame):
     def __init__(self, plugin_config, plot_config, parent = None, width = 4, height = 4, dpi = 100):
@@ -55,10 +55,10 @@ class PHDPlotWidget(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        #         FigureCanvas.setSizePolicy(self,
-        #                 QSizePolicy.Expanding,
-        #                 QSizePolicy.Expanding)
-        #         FigureCanvas.updateGeometry(self)
+        FigureCanvas.setSizePolicy(self,
+                                   QSizePolicy.Maximum,
+                                   QSizePolicy.Maximum)
+        FigureCanvas.updateGeometry(self)
 
         # Line plot
         self.phdplot = self.axes.plot(self.xdata, self.data, color = 'black', ds = 'steps-mid')

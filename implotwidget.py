@@ -7,6 +7,7 @@ from matplotlib.figure import Figure
 from matplotlib.colors import LogNorm, PowerNorm, Normalize
 
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QWidget
+from PyQt5.QtWidgets import QSizePolicy, QSpacerItem
 
 class ImplotWidgetCont(QFrame):
     def __init__(self, plugin_config, plot_config, parent = None, width = 6, height = 6, dpi = 100):
@@ -32,6 +33,7 @@ class ImplotWidgetCont(QFrame):
         self.bt_layout.addWidget(QLabel("Colormap: "))
         self.cm_combo = QComboBox()
         self.cm_combo.addItems(["cubehelix", "inferno", "cividis", "viridis", "gist_stern", "gist_heat", "afmhot", "gray"])
+        #self.cm_combo.setFixedSize()
         self.bt_layout.addWidget(self.cm_combo)
         self.cm_combo.currentTextChanged.connect(self.cm_update)
 
@@ -47,7 +49,9 @@ class ImplotWidgetCont(QFrame):
         self.rf_combo.addItems(["1"])
         self.bt_layout.addWidget(self.rf_combo)
 
-        self.bt_layout.addStretch()
+        #self.bt_layout.addStretch(10)
+        self.bt_layout.addSpacerItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding))
+        #self.bt_layout.insertStretch(-1)
 
 
         self.norm_update(self.sc_combo.currentText())
@@ -80,7 +84,6 @@ class ImplotWidget(FigureCanvas):
     def __init__(self, plugin_config, plot_config, parent = None, width = 4, height = 4, dpi = 100):
 
         self.fig = Figure(figsize = (width, height), dpi = dpi)
-        #self.fig.tight_layout()
         
         self.segment = plot_config.segment
 
@@ -99,10 +102,10 @@ class ImplotWidget(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        #         FigureCanvas.setSizePolicy(self,
-        #                 QSizePolicy.Expanding,
-        #                 QSizePolicy.Expanding)
-        #         FigureCanvas.updateGeometry(self)
+        FigureCanvas.setSizePolicy(self,
+                                   QSizePolicy.Maximum,
+                                   QSizePolicy.Maximum)
+        FigureCanvas.updateGeometry(self)
 
         # image plot
         self.im = self.axes.imshow(self.data, origin = 'lower', cmap = 'cubehelix',
@@ -118,6 +121,8 @@ class ImplotWidget(FigureCanvas):
 
         # Handle mouse button presses
         self.fig.canvas.mpl_connect('button_press_event', self.on_click)
+
+        self.fig.tight_layout()
         
         #self.plot()
         self.draw()
