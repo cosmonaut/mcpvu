@@ -135,6 +135,7 @@ class BasePlugin(object):
                     print("Closing sampling thread")
                     return
 
+                time.sleep(0.01)
                 continue
 
             # Fill data object with test fake data
